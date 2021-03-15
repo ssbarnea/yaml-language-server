@@ -19,10 +19,14 @@ import {
 import { URI } from 'vscode-uri';
 
 import * as nls from 'vscode-nls';
-import { convertSimple2RegExpPattern } from '../utils/strings';
 import { SingleYAMLDocument } from '../parser/yamlParser07';
 import { JSONDocument } from '../parser/jsonParser07';
 import * as yaml from 'js-yaml';
+import micromatch from 'micromatch';
+
+// micromatch();
+// const moment = __importDefault(require('moment'));
+// moment.default();
 
 const localize = nls.loadMessageBundle();
 
@@ -57,14 +61,14 @@ export interface SchemaDeletionsAll {
 
 export class FilePatternAssociation {
   private schemas: string[];
-  private patternRegExp: RegExp;
+  private pattern: string;
 
   constructor(pattern: string) {
     try {
-      this.patternRegExp = new RegExp(convertSimple2RegExpPattern(pattern) + '$');
+      this.pattern = pattern;
     } catch (e) {
       // invalid pattern
-      this.patternRegExp = null;
+      this.pattern = null;
     }
     this.schemas = [];
   }
@@ -74,7 +78,7 @@ export class FilePatternAssociation {
   }
 
   public matchesPattern(fileName: string): boolean {
-    return this.patternRegExp && this.patternRegExp.test(fileName);
+    return this.pattern && micromatch.isMatch(fileName, this.pattern);
   }
 
   public getSchemas(): string[] {
